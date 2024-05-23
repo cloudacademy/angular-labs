@@ -1,0 +1,8 @@
+<div class="product-details">
+    <h2>{{ product.name }}</h2>
+    <p class="product-description">{{ product.description | truncate}}</p>
+    <p>Price: {{ product.price | currency: "GBP"}}</p>
+    <button class="button-add-to-cart" (click)="onAddToCartClicked()">Add to Cart</button>
+</div>
+
+
