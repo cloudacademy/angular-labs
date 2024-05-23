@@ -85,26 +85,9 @@
     [![result](res/result1.png)]() 
 
 
-## 3. Create Product Model
+## 3. Create Parent Child Communication between Components
 
-### 3.1 Create new Folder and Class
-- Inide `src/app/` create a new filder called `models`:
-- Inide `src/app/models` create a new file called `product.ts`
-- Open `src/app/models/product.ts` and add the following code:
-
-    ```.js
-    export class Product {
-        constructor(
-            public name: string,
-            public price: number,
-        ) {}
-    }
-    ```
- 
-
-## 4. Create Parent Child Communication between Components
-
-### 4.1 Modify ProductListComponent
+### 3.1 Modify ProductListComponent
 1. Open `src/app/components/product-list/product-list.component.ts` file and inside `ProductListComponent` class do the following:
     - Declare an emty cart list:
 
@@ -130,7 +113,7 @@
         Cart:{{cart.length}}
         ```
 
-### 4.2 Modify ProductComponent
+### 3.2 Modify ProductComponent
 1. Open `src/app/components/product/product.component.ts` file and inside `ProductComponent` class do the following:
     - Declare a product Input() that is passed from parent component :
     
@@ -162,7 +145,7 @@
         </div>
         ```
 
-### 4.3 Pass Data to and from child component
+### 3.3 Pass Data to and from child component
 1. Open `src/app/components/product-list/product-list.component.html` file and do the following:
     - Pass product that we declared earlier to the `ProductComponent`:
 
@@ -177,7 +160,7 @@
         ```
 
 
-### 4.4 Instpect Changes
+### 3.4 Instpect Changes
 
 1. Start Angular Development Server if not yet started:
 

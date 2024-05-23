@@ -1,0 +1,10 @@
+<!-- <div>
+    <h2>Product List</h2>
+    Cart:{{cart.length}}
+    <app-product (addToCartEvent)="addToCart($event)"></app-product>
+
+</div> -->
+
+<p>product-list works!</p>
+Cart:{{cart.length}}
+<app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
