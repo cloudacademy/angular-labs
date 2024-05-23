@@ -1,4 +1,4 @@
-# Create a New Angular Component
+# Create a New Angular Template
 
 ## 1. Setup Project
 
@@ -17,61 +17,7 @@
 3. You should see a message in your Terminal confirming the npm packages were installed successfully:
     [![installed](res/installed.png)]() 
 
-## 2. Create Components
-
-### 2.1 Create Product Component
-1. Create a new component called `Product` using CLI:
-
-    ```.sh
-    npx -p @angular/cli ng generate component components/product
-    ```
-
-### 2.2 Create ProductList Component
-
-1. Create a new component called `ProductList` using CLI:
-
-    ```.sh
-    npx -p @angular/cli ng generate component components/product-list
-    ```
-
-### 2.3 Import ProductComponent 
-
-1. Import `ProductComponent` into `src/app/components/product-list/product-list.component.ts`:
-
-    ```.js
-    import { ProductComponent } from '../product/product.component';
-    ```
-2. Inside `src/app/components/product-list/product-list.component.ts` update `imports` to include `ProductComponent`:
-
-    ```.js
-    imports: [ProductComponent],
-    ```
-3. Open `src/app/components/product-list/product-list.component.html` template and add the following element:
-
-    ```.html
-    <app-product></app-product>
-    ```
-
-### 2.4 Import ProductListComponent 
-
-1. Import `ProductListComponent` into `src/app/app.component.ts`:
-
-    ```.js
-    import { ProductListComponent } from './components/product-list/product-list.component';
-    ```
-
-2. Inside `src/app/app.component.ts` update `imports` to include `ProductListComponent`:
-
-    ```.js
-    imports: [RouterOutlet, ProductListComponent],
-    ```
-3. Open `src/app/app.component.html` template and add the following element after the `<div class="divider"...`
-
-    ```.html
-    <app-product-list></app-product-list>
-    ```
-
-### 2.5 Start The Application
+### 1.1 Start The Application
 
 1. Start Angular Development Server if not yet started:
 
@@ -84,81 +30,114 @@
 
     [![result](res/result1.png)]() 
 
+    > _You should see similar view to where you left off in previous lab._
 
-## 3. Create Parent Child Communication between Components
 
-### 3.1 Modify ProductListComponent
-1. Open `src/app/components/product-list/product-list.component.ts` file and inside `ProductListComponent` class do the following:
-    - Declare an emty cart list:
+## 2. Create Templates
 
-        ```.js
-        cart: Product[] = [];
-        ```
-    - Declare a Product:
-
-        ```.js
-        product = new Product('Product A',  10.99);
-        ```
-    - Create a method called `addToCart()` that is takes product as a parameter and pushes that product to the cart:
-
-        ```.js
-        addToCart(product: Product) {
-            this.cart.push(product);
+### 2.1 Update Template For Product Component
+1. Open `src/app/components/product/product.component.css` file and do the following:
+    - Create a `product-details` css class selector:
+        ```.css
+        .product-details {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         ```
-2. Open `src/app/components/product-list/product-lis.component.html` file and do the following:
-    - Display cart list length. Just before `<app-product>` add the following:
-    
-        ```.html
-        Cart:{{cart.length}}
-        ```
-
-### 3.2 Modify ProductComponent
-1. Open `src/app/components/product/product.component.ts` file and inside `ProductComponent` class do the following:
-    - Declare a product Input() that is passed from parent component :
-    
-        ```.js
-        @Input() product!: Product;
-        ```
-    
-    - Declare `addToCartEvent` event emmiter to emit event to parent component:
-
-        ```.js
-        @Output() addToCartEvent = new EventEmitter<Product>();
-        ```
-
-    - Create a method called `onAddToCartClicked()` will emit a product to the `addToCartEvent` emmiter:
-
-        ```.js
-        onAddToCartClicked(){
-            this.addToCartEvent.emit(this.product);
+    - Create a `button-add-to-cart` css class selector:
+        ```.css
+        .button-add-to-cart {
+            width: 100%;
+            background-color: #04AA6D;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .button-add-to-cart:hover {
+            background-color: #45a049;
         }
         ```
+
 2. Open `src/app/components/product/product.component.html` file and do the following:
-    - Replace `<p>product works!</p>` with the following:
+    - Update current HTML with css class selectors created in previous step:
     
         ```.html
-        <div>
+        <div class="product-details">
             <h2>{{ product.name }}</h2>
             <p>Price: {{ product.price }}</p>
-            <button (click)="onAddToCartClicked()">Add to Cart</button>
+            <button class="button-add-to-cart" (click)="onAddToCartClicked()">Add to Cart</button>
         </div>
         ```
 
-### 3.3 Pass Data to and from child component
+### 2.2 Update Template For Product List Component
+
 1. Open `src/app/components/product-list/product-list.component.html` file and do the following:
-    - Pass product that we declared earlier to the `ProductComponent`:
-
+    - Update current HTML with the following:
+    
         ```.html
-        <app-product [product]="product"></app-product>
+        <div>
+            <h2>Product List</h2>
+            🛒 {{cart.length}}
+            <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
+        </div>
         ```
 
-    -  Bind output property and function that were declared earlier:
+### 2.3 Start The Application
+
+1. Start Angular Development Server if not yet started:
+
+    ```.bash
+    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    ```
+    > _Otherwise refresh the browser tab to see updated view._
+
+2. You should see the following getting rendered in your browser:
+
+    [![result2](res/result2.png)]() 
+
+
+## 3. Template Control Flow
+
+### 3.1 Modify Product List Template To Conditionaly Display Cart Value
+
+1. Open `src/app/components/product-list/product-list.component.html` file and do the following:
+    - Update current HTML to include Angular built-in control flow block that allows conditionaly display elements:
 
         ```.html
-        <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
+        @if (cart.length > 0) {
+            🛒 {{cart.length}}
+        } @else {
+            🛒 Empty
+        }
         ```
 
+### 3.1 Modify Product List Template To Render List Of Products
+
+1. Open `src/app/components/product-list/product-list.component.ts` file and do the following:
+    - Replace `product` variable with list of products:
+
+        ```.ts
+        products: Product[] = [
+            new Product('Product A',  10.99), 
+            new Product('Product B',  7.59), 
+            new Product('Product C',  3.20)
+        ];
+        ```
+2. Open `src/app/components/product-list/product-list.component.html` file and do the following:
+    - Update current HTML to include Angular built-in control flow block that allows repeatedly display elements:
+
+        ```.html
+        @for (product of products; track product) {
+            <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
+        }
+        ```
 
 ### 3.4 Instpect Changes
 
@@ -171,4 +150,4 @@
 
 2. You should see the following getting rendered in your browser:
 
-    [![result](res/result2.png)]() 
+    [![result3](res/result3.png)]() 
