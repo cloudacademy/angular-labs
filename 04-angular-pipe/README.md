@@ -32,64 +32,28 @@
 
     > _You should see similar view to where you left off in previous lab._
 
+## 2. Use Built-in Pipe
 
-## 2. Create Pipe
+### 2.1 Update Product Component To Use Built-in Corrency Pipe
+1. Open `src/app/components/product/product.component.ts` file and do the following:
+    - Import `CurrencyPipe` from `'@angular/common'`:
 
-### 2.1 Update Template For Product Component
-1. Open `src/app/components/product/product.component.css` file and do the following:
-    - Create a `product-details` css class selector:
-        ```.css
-        .product-details {
-            background-color: #f9f9f9;
-            padding: 20px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+        ```.js
+        import { CurrencyPipe } from '@angular/common';​
         ```
-    - Create a `button-add-to-cart` css class selector:
-        ```.css
-        .button-add-to-cart {
-            width: 100%;
-            background-color: #04AA6D;
-            color: white;
-            padding: 14px 20px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .button-add-to-cart:hover {
-            background-color: #45a049;
-        }
-        ```
+    - 2. Update `imports` to include `CurrencyPipe`:
 
+        ```.js
+          imports: [CurrencyPipe],
+        ```
 2. Open `src/app/components/product/product.component.html` file and do the following:
-    - Update current HTML with css class selectors created in previous step:
-    
+    - Update Paragraph element representing Price to include currency pipe:
+
         ```.html
-        <div class="product-details">
-            <h2>{{ product.name }}</h2>
-            <p>Price: {{ product.price }}</p>
-            <button class="button-add-to-cart" (click)="onAddToCartClicked()">Add to Cart</button>
-        </div>
+        <p>Price: {{ product.price | currency: "GBP"}}</p>
         ```
 
-### 2.2 Update Template For Product List Component
-
-1. Open `src/app/components/product-list/product-list.component.html` file and do the following:
-    - Update current HTML with the following:
-    
-        ```.html
-        <div>
-            <h2>Product List</h2>
-            🛒 {{cart.length}}
-            <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
-        </div>
-        ```
-
-### 2.3 Start The Application
+### 2.2 Instpect Changes
 
 1. Start Angular Development Server if not yet started:
 
@@ -103,43 +67,95 @@
     [![result2](res/result2.png)]() 
 
 
-## 3. Template Control Flow
+## 3. Create Custom Pipe
 
-### 3.1 Modify Product List Template To Conditionaly Display Cart Value
+### 3.1 Update Product Model with description
 
-1. Open `src/app/components/product-list/product-list.component.html` file and do the following:
-    - Update current HTML to include Angular built-in control flow block that allows conditionaly display elements:
+- Open `src/app/models/product.ts` file and extend current implementation with new `description` property:
 
-        ```.html
-        @if (cart.length > 0) {
-            🛒 {{cart.length}}
-        } @else {
-            🛒 Empty
-        }
+    ```.js
+    export class Product {
+        constructor(
+            public name: string,
+            public description: string,
+            public price: number,
+        ) {}
+    }
+    ```
+
+### 3.2 Update Product List Component
+
+- Open `src/app/components/product-list/product-list.component.ts` file and update current list of Products array. Add description to each instance of a Product:
+
+    ```.js
+    products: Product[] = [
+        new Product('Product A', 'This is a very long text that needs to be truncated', 10.99), 
+        new Product('Product B', 'All Good', 7.59), 
+        new Product('Product C', 'This is a very long text that needs to be truncated ', 3.20)
+    ];
+    ```
+### 3.3 Update Product Component
+
+- Open `src/app/components/product/product.component.css` file and add a new CSS selector to style product details.
+
+    ```.css
+    .product-description {
+        font-size: 16px;
+        color: #666;
+    }
+    ```
+
+- Open `src/app/components/product/product.component.html` file and add a new Paragraph just below the product `<h2>` title element:
+
+    ```.html
+    <p class="product-description">{{ product.description }}</p>
+    ```
+
+### 3.3 Generate Custom Pipe
+
+- In your terminal window type in the following commad:
+
+    ```.sh
+    npx -p @angular/cli ng generate pipe pipes/truncate
+    ```
+
+- Open `src/app/pipes/truncate.pipe.ts` file and add the following implementation to newly created `truncate` pipe.
+```.js
+@Pipe({
+  name: 'truncate',
+  standalone: true
+})
+export class TruncatePipe implements PipeTransform {
+
+  transform(value: string, maxLength: number = 20): string {
+    if (value.length <= maxLength) {
+      return value;
+    }
+    return value.substring(0, maxLength) + '...';
+  }
+}
+```
+
+### 3.4 Update Product Component To Use Custom Pipe
+
+- Open `src/app/components/product/product.component.ts` file and do the following:
+    - Import `TruncatePipe` from `'../../pipes/truncate.pipe'`
+
+        ```.js
+        import { TruncatePipe } from '../../pipes/truncate.pipe';
+        ```
+    - Update `imports` to include `TruncatePipe`:
+
+        ```.js
+        imports: [CurrencyPipe, TruncatePipe],
         ```
 
-### 3.1 Modify Product List Template To Render List Of Products
+- Open `src/app/components/product/product.component.html` and update product paragraph to include the `truncate` pipe: 
+    ```.html
+    <p class="product-description">{{ product.description | truncate}}</p>
+    ```
 
-1. Open `src/app/components/product-list/product-list.component.ts` file and do the following:
-    - Replace `product` variable with list of products:
-
-        ```.ts
-        products: Product[] = [
-            new Product('Product A',  10.99), 
-            new Product('Product B',  7.59), 
-            new Product('Product C',  3.20)
-        ];
-        ```
-2. Open `src/app/components/product-list/product-list.component.html` file and do the following:
-    - Update current HTML to include Angular built-in control flow block that allows repeatedly display elements:
-
-        ```.html
-        @for (product of products; track product) {
-            <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
-        }
-        ```
-
-### 3.4 Instpect Changes
+### 3.5 Instpect Changes
 
 1. Start Angular Development Server if not yet started:
 
