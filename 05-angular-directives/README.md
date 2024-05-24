@@ -1,4 +1,4 @@
-# Create Custom Pipe
+# Create Custom Directives
 
 ## 1. Setup Project
 
@@ -32,26 +32,47 @@
 
     > _You should see similar view to where you left off in previous lab._
 
-## 2. Use Built-in Pipe
+## 2. Custom Attribute Directive​
 
-### 2.1 Update Product Component To Use Built-in Corrency Pipe
-1. Open `src/app/components/product/product.component.ts` file and do the following:
-    - Import `CurrencyPipe` from `'@angular/common'`:
+### 2.1 Create Custom Attribute Directive
 
-        ```.js
-        import { CurrencyPipe } from '@angular/common';​
-        ```
-    - 2. Update `imports` to include `CurrencyPipe`:
+- Create a new drirective called `ZoomOnHoover` using CLI:
 
-        ```.js
-          imports: [CurrencyPipe],
-        ```
-2. Open `src/app/components/product/product.component.html` file and do the following:
-    - Update Paragraph element representing Price to include currency pipe:
+    ```.sh
+    npx -p @angular/cli ng generate directive directives/zoom-on-hoover
+    ```
 
-        ```.html
-        <p>Price: {{ product.price | currency: "GBP"}}</p>
-        ```
+- Open `src/app/directives/zoom-on-hoover.directive.ts` file and add the following code:
+
+    ```.js
+    export class ZoomOnHooverDirective {
+        constructor(private elRef: ElementRef) {}
+
+        @HostListener('mouseover')
+        onMouseOver() {
+            this.elRef.nativeElement.style.transform = 'scale(1.03)';
+        }
+
+        @HostListener('mouseout')
+        onMouseOut() {
+            this.elRef.nativeElement.style.transform = 'scale(1)';
+        }
+    }
+    ```
+    > _This directive uses the @HostListener decorator to listen for the mouseover and mouseout events on the host element. When the pointer hovers over the element decorated with this directive, the directive scales it up by 3% using the CSS transform property. When the pointer leaves the card, the directive resets the scale back to its original value._
+
+### 2.2 Import Attribute Directive Into Component
+
+1. Open `src/app/components/product/product.component.ts` file and import `ZoomOnHoover` directive :
+
+    ```.js
+    imports: [CurrencyPipe, TruncatePipe, ZoomOnHooverDirective],
+    ```
+1. Open `src/app/components/product/product.component.html` file and and apply `ZoomOnHoover` directive to an element.​:
+
+    ```.html
+    <div class="product-details" appZoomOnHoover>
+    ```
 
 ### 2.2 Instpect Changes
 
@@ -67,95 +88,79 @@
     [![result2](res/result2.png)]() 
 
 
-## 3. Create Custom Pipe
+## 3. Custom Structural Directive​
 
-### 3.1 Update Product Model with description
-
-- Open `src/app/models/product.ts` file and extend current implementation with new `description` property:
-
-    ```.js
-    export class Product {
-        constructor(
-            public name: string,
-            public description: string,
-            public price: number,
-        ) {}
-    }
-    ```
-
-### 3.2 Update Product List Component
-
-- Open `src/app/components/product-list/product-list.component.ts` file and update current list of Products array. Add description to each instance of a Product:
-
-    ```.js
-    products: Product[] = [
-        new Product('Product A', 'This is a very long text that needs to be truncated', 10.99), 
-        new Product('Product B', 'All Good', 7.59), 
-        new Product('Product C', 'This is a very long text that needs to be truncated ', 3.20)
-    ];
-    ```
-### 3.3 Update Product Component
-
-- Open `src/app/components/product/product.component.css` file and add a new CSS selector to style product details.
-
-    ```.css
-    .product-description {
-        font-size: 16px;
-        color: #666;
-    }
-    ```
-
-- Open `src/app/components/product/product.component.html` file and add a new Paragraph just below the product `<h2>` title element:
-
-    ```.html
-    <p class="product-description">{{ product.description }}</p>
-    ```
-
-### 3.3 Generate Custom Pipe
-
-- In your terminal window type in the following commad:
+### 3.1 Create Custom Attribute Directive
+- Create a new drirective called `Tooltip` using CLI:
 
     ```.sh
-    npx -p @angular/cli ng generate pipe pipes/truncate
+    npx -p @angular/cli ng generate directive directives/tooltip 
     ```
 
-- Open `src/app/pipes/truncate.pipe.ts` file and add the following implementation to newly created `truncate` pipe.
-```.js
-@Pipe({
-  name: 'truncate',
-  standalone: true
-})
-export class TruncatePipe implements PipeTransform {
+- Open `src/app/directives/tooltip.directive.ts` file and add the following code:
+    ```.js
+    @Directive({
+    selector: '[appTooltip]',
+    standalone: true
+    })
+    export class TooltipDirective {
 
-  transform(value: string, maxLength: number = 20): string {
-    if (value.length <= maxLength) {
-      return value;
+    @Input('appTooltip') tooltipText!: string;
+    tooltipElement = this.renderer.createElement('span');
+    
+
+    constructor(private el: ElementRef, private renderer: Renderer2) {
+        this.renderer.listen(this.el.nativeElement, 'mouseover', () => {
+        this.showTooltip();
+        });
+        this.renderer.listen(this.el.nativeElement, 'mouseout', () => {
+        this.hideTooltip();
+        });
     }
-    return value.substring(0, maxLength) + '...';
-  }
-}
-```
 
-### 3.4 Update Product Component To Use Custom Pipe
+    showTooltip() {
+        this.renderer.appendChild(this.el.nativeElement, this.tooltipElement);
+        this.renderer.setProperty(this.tooltipElement, 'textContent', this.tooltipText);
 
-- Open `src/app/components/product/product.component.ts` file and do the following:
-    - Import `TruncatePipe` from `'../../pipes/truncate.pipe'`
+        const tooltipStyle: any = {
+        'position': 'absolute',
+        'padding': '10px',
+        'border-radius': '5px',
+        'background-color': '#333',
+        'color': '#fff',
+        'font-size': '14px'
+        };
+        Object.keys(tooltipStyle).forEach(style => {
+        this.renderer.setStyle(this.tooltipElement, style, tooltipStyle[style]);
+        });
+    }
 
-        ```.js
-        import { TruncatePipe } from '../../pipes/truncate.pipe';
-        ```
-    - Update `imports` to include `TruncatePipe`:
-
-        ```.js
-        imports: [CurrencyPipe, TruncatePipe],
-        ```
-
-- Open `src/app/components/product/product.component.html` and update product paragraph to include the `truncate` pipe: 
-    ```.html
-    <p class="product-description">{{ product.description | truncate}}</p>
+    hideTooltip() {
+        this.renderer.removeChild(this.el.nativeElement, this.tooltipElement);
+    }
+    }
     ```
 
-### 3.5 Instpect Changes
+    - The @Input('appTooltip') tooltipText!: string; decorator allows the tooltip text to be passed in from the template.
+    - In the constructor, two event listeners are set up for the element: mouseover and mouseout. When these events occur, the showTooltip() or hideTooltip() methods are called respectively.
+    - The showTooltip() method creates a new HTML span element (this.tooltipElement) and appends it to the host element using the Renderer2's appendChild() method. It then sets the text content of the tooltip element using setProperty(), and applies some styles to the tooltip element using the setStyle() method.
+    - The hideTooltip() method removes the tooltip element from the host element using the Renderer2's removeChild() method.
+
+
+### 3.2 Import Structural Directive Into Component
+
+1. Open `src/app/components/product/product.component.ts` file and import `Tooltip` directive :
+
+    ```.js
+    imports: [CurrencyPipe, TruncatePipe, TooltipDirective],
+    ```
+1. Open `src/app/components/product/product.component.html` file and and apply `Tooltip` directive to an element.​:
+
+    ```.html
+    <p [appTooltip]="product.description" ...
+    ```
+
+### 3.3 Instpect Changes
 
 1. Start Angular Development Server if not yet started:
 
