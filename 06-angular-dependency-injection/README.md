@@ -1,4 +1,4 @@
-# Dependency Injection Demo
+# Dependency Injection Lab
 
 ## 1. Setup Project
 
@@ -32,49 +32,73 @@
 
     > _You should see similar view to where you left off in previous lab._
 
-## 2. Custom Attribute Directive​
+## 2. Create A Service​
 
-### 2.1 Create Custom Attribute Directive
+### 2.1 Create A Service To Return List Of Products
 
-- Create a new drirective called `ZoomOnHoover` using CLI:
+1. Create a new service called `ProductService` using CLI:
 
     ```.sh
-    npx -p @angular/cli ng generate directive directives/zoom-on-hoover
+    npx -p @angular/cli ng generate service services/product
     ```
 
-- Open `src/app/directives/zoom-on-hoover.directive.ts` file and add the following code:
+2. Open `src/app/services/product.service.ts` file and add the following code:
 
     ```.js
-    export class ZoomOnHooverDirective {
-        constructor(private elRef: ElementRef) {}
+    import { Injectable } from '@angular/core';
+    import  DATA from './MOCK_DATA.json';
 
-        @HostListener('mouseover')
-        onMouseOver() {
-            this.elRef.nativeElement.style.transform = 'scale(1.03)';
-        }
+    @Injectable({
+        providedIn: 'root'
+    })
+    export class ProductService {
+        constructor() { }
 
-        @HostListener('mouseout')
-        onMouseOut() {
-            this.elRef.nativeElement.style.transform = 'scale(1)';
+        getProducts(){
+            return DATA;
         }
     }
     ```
-    > _This directive uses the @HostListener decorator to listen for the mouseover and mouseout events on the host element. When the pointer hovers over the element decorated with this directive, the directive scales it up by 3% using the CSS transform property. When the pointer leaves the card, the directive resets the scale back to its original value._
+    > _getProducts() method will return the mock Data imported from MOCK_DATA.json._
 
-### 2.2 Import Attribute Directive Into Component
+## 3. Inject Service as Dependency Into Component
 
-1. Open `src/app/components/product/product.component.ts` file and import `ZoomOnHoover` directive :
+
+### 3.1 Update Product Model with id.
+1. Open `src/app/models/product.ts` and update `Product` model with the follwoing:
 
     ```.js
-    imports: [CurrencyPipe, TruncatePipe, ZoomOnHooverDirective],
+    export class Product {
+        constructor(
+            public id: number,
+            public name: string,
+            public description: string,
+            public price: number,
+        ) {}
+    }
     ```
-1. Open `src/app/components/product/product.component.html` file and and apply `ZoomOnHoover` directive to an element.​:
 
-    ```.html
-    <div class="product-details" appZoomOnHoover>
-    ```
+### 3.2 Inject Product Service to Product List Component
 
-### 2.2 Instpect Changes
+1. Open `src/app/components/product-list/product-list.component.ts` file and do the following:
+    - Import ProductService:
+
+        ```.js
+        import { ProductService } from '../../services/product.service';
+        ```
+
+    - Add the `ProductService` as a parameter into the  `constructor`.
+
+        ```.js
+         constructor(private productService: ProductService) {}
+        ```
+    - Replace static list of Products with a service call.
+
+        ```.js
+        products: Product[] = this.productService.getProducts();
+        ```
+
+### 3.3 Instpect Changes
 
 1. Start Angular Development Server if not yet started:
 
@@ -88,79 +112,44 @@
     [![result2](res/result2.png)]() 
 
 
-## 3. Custom Structural Directive​
+## 4. Injecting Services In Other Services 
 
-### 3.1 Create Custom Attribute Directive
-- Create a new drirective called `Tooltip` using CLI:
+### 4.1 Create A New Logger And Implement It's Logic
+
+1. Create a new `Logger` using CLI:
 
     ```.sh
-    npx -p @angular/cli ng generate directive directives/tooltip 
+    npx -p @angular/cli ng generate service services/logger/logger 
     ```
+2. Open `src/app/services/logger/logger.service.ts` file and do the following:
+    - Create logging methods just below the `constructor` :
 
-- Open `src/app/directives/tooltip.directive.ts` file and add the following code:
-    ```.js
-    @Directive({
-    selector: '[appTooltip]',
-    standalone: true
-    })
-    export class TooltipDirective {
+        ```.js
+        log(msg: unknown) { console.log(msg); }
+        error(msg: unknown) { console.error(msg); }
+        warn(msg: unknown) { console.warn(msg); }
+        ```
 
-    @Input('appTooltip') tooltipText!: string;
-    tooltipElement = this.renderer.createElement('span');
-    
+### 4.2 Inject Logger Service Into Project Service And Log When Projects Are Fetched
 
-    constructor(private el: ElementRef, private renderer: Renderer2) {
-        this.renderer.listen(this.el.nativeElement, 'mouseover', () => {
-        this.showTooltip();
-        });
-        this.renderer.listen(this.el.nativeElement, 'mouseout', () => {
-        this.hideTooltip();
-        });
-    }
+1. Open `src/app/services/product.service.ts` file and do the following:
+    - Import Logger service:
 
-    showTooltip() {
-        this.renderer.appendChild(this.el.nativeElement, this.tooltipElement);
-        this.renderer.setProperty(this.tooltipElement, 'textContent', this.tooltipText);
+        ```.js
+        import { LoggerService } from '../logger/logger.service';
+        ```
 
-        const tooltipStyle: any = {
-        'position': 'absolute',
-        'padding': '10px',
-        'border-radius': '5px',
-        'background-color': '#333',
-        'color': '#fff',
-        'font-size': '14px'
-        };
-        Object.keys(tooltipStyle).forEach(style => {
-        this.renderer.setStyle(this.tooltipElement, style, tooltipStyle[style]);
-        });
-    }
+    - Add the `LoggerService` as a parameter into the  `constructor`.
 
-    hideTooltip() {
-        this.renderer.removeChild(this.el.nativeElement, this.tooltipElement);
-    }
-    }
-    ```
+        ```.js
+        constructor(private logger: LoggerService) { }
+        ```
+    - Inside `getProducts()` method log that courses are getting fetched.
 
-    - The @Input('appTooltip') tooltipText!: string; decorator allows the tooltip text to be passed in from the template.
-    - In the constructor, two event listeners are set up for the element: mouseover and mouseout. When these events occur, the showTooltip() or hideTooltip() methods are called respectively.
-    - The showTooltip() method creates a new HTML span element (this.tooltipElement) and appends it to the host element using the Renderer2's appendChild() method. It then sets the text content of the tooltip element using setProperty(), and applies some styles to the tooltip element using the setStyle() method.
-    - The hideTooltip() method removes the tooltip element from the host element using the Renderer2's removeChild() method.
-
-
-### 3.2 Import Structural Directive Into Component
-
-1. Open `src/app/components/product/product.component.ts` file and import `Tooltip` directive :
-
-    ```.js
-    imports: [CurrencyPipe, TruncatePipe, TooltipDirective],
-    ```
-1. Open `src/app/components/product/product.component.html` file and and apply `Tooltip` directive to an element.​:
-
-    ```.html
-    <p [appTooltip]="product.description" ...
-    ```
-
-### 3.3 Instpect Changes
+        ```.js
+        this.logger.log('Fetching Products');
+        ```
+### 4.3 Review Changes
 
 1. Start Angular Development Server if not yet started:
 
@@ -169,6 +158,70 @@
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
-2. You should see the following getting rendered in your browser:
-
+2. Inspect console and see whether your application logs with Logger.
     [![result3](res/result3.png)]() 
+
+## 5. Configuring Dependency Providers
+
+
+### 5.1 Creating Enhanced Logger
+
+1. Create a new `TimedLoggerService` using CLI:
+
+    ```.sh
+    npx -p @angular/cli ng generate service services/logger/timed-logger 
+    ```
+
+2. Open `src/app/services/logger/timed-logger.service.ts` file and do the following:
+    - Extend `LoggerService` with `TimedLoggerService`:
+
+        ```.js
+        export class TimeLoggerService extends LoggerService {...}
+        ```
+    - Override logging methods just below the `constructor`:
+
+        ```.js
+        constructor() {
+            super()
+        }
+        private getUtcDate(){
+            const timeElapsed = Date.now();
+            const today = new Date(timeElapsed);
+            const utcDate = today.toUTCString();
+            return utcDate;
+        }
+
+        override log(msg: unknown) { 
+            const date = this.getUtcDate();
+            console.log(`${date}: ${msg}`); 
+        }
+        override error(msg: unknown) { 
+            const date = this.getUtcDate();
+            console.error(`${date}: ${msg}`); 
+        }
+        override warn(msg: unknown) { 
+            const date = this.getUtcDate();
+            console.warn(`${date}: ${msg}`); 
+        }
+        ```
+
+### 5.2 Configure an app-wide provider in the ApplicationConfig of bootstrapApplication, it overrides one configured for root in the @Injectable() metadata.
+
+1. Open `app.config.ts` file and add the following:
+    - Update providers with the following:
+
+    ```.js
+      providers: [provideRouter(routes), provideClientHydration(), {provide: LoggerService, useClass: TimedLoggerService}]
+    ```
+
+### 5.3 Review Changes
+
+1. Start Angular Development Server if not yet started:
+
+    ```.bash
+    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    ```
+    > _Otherwise refresh the browser tab to see updated view._
+
+2. Inspect console and see whether your application logs with new Enhanced Timed Logger.
+    [![result4](res/result4.png)]() 
