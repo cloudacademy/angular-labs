@@ -1,0 +1,8 @@
+<div class="product-details" appZoomOnHoover>
+    <h2>{{ product.name }}</h2>
+    <p [appTooltip]="product.description" class="product-description">{{ product.description | truncate}}</p>
+    <p>Price: {{ product.price | currency: "GBP"}}</p>
+    <button class="button-add-to-cart" (click)="onAddToCartClicked()">Add to Cart</button>
+</div>
+
+
