@@ -1,0 +1,16 @@
+<main class="main">
+  <div class="content">
+    <div>
+      <h1>Hello, {{ title }}</h1>
+      <p>Congratulations! Your app is running. 🎉</p>
+      
+      <div class="divider" role="separator" aria-label="Divider"></div>
+
+      <app-cart></app-cart>
+
+      <app-product-list (addToCartEvent)="addToCart($event)"></app-product-list>
+    </div>
+  </div>
+</main>
+
+<router-outlet />
