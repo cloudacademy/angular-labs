@@ -32,187 +32,121 @@
 
     > _You should see similar view to where you left off in previous lab._
 
-## 2. Create A Service​
+## 2. Move Cart Separate Component
 
-### 2.1 Create A Service To Return List Of Products
+### 2.1 Create A Cart Component
 
-1. Create a new service called `ProductService` using CLI:
+- Create a new Component called `Cart` using CLI:
 
     ```.sh
-    npx -p @angular/cli ng generate service services/product
+    npx -p @angular/cli ng generate component components/cart
     ```
 
-2. Open `src/app/services/product.service.ts` file and add the following code:
+### 2.2 Implement Signal Inside Cart Component
 
-    ```.js
-    import { Injectable } from '@angular/core';
-    import  DATA from './MOCK_DATA.json';
+- Open `src/app/components/cart/cart.component.ts` file and do the following:
+    - Declate a writable signal and set its default value to empty list `[]`:
 
-    @Injectable({
-        providedIn: 'root'
-    })
-    export class ProductService {
-        constructor() { }
+        ```.js
+        currentCart = signal<Product[]>([]);
+        ```
 
-        getProducts(){
-            return DATA;
+    - Inside `constructor` of `CartComponent`, call an `effect` and log the Signal value:
+
+        ```.js
+        constructor(){
+            effect(() => {
+                console.log(`The current car contains: ${this.currentCart()}`);
+            });
         }
+        ```
+    - Inside `CartComponent`, just below constructor, declare `addToCart` function that takes `Product` as a parameter:
+
+        ```.js
+        public addToCart(product: Product){
+            this.currentCart.update(list => {
+                return [...list, product];
+            })
+        }
+        ```
+
+- Open `src/app/components/cart/cart.component.html` and replace current HTML code with the following:
+
+    ```.html
+    @if (currentCart().length > 0) {
+        🛒 {{currentCart().length}}
+    } @else {
+        🛒 Empty
     }
     ```
-    > _getProducts() method will return the mock Data imported from MOCK_DATA.json._
 
-## 3. Inject Service as Dependency Into Component
+### 2.3 Remove Cart From Product List Component
 
+- Open `src/app/components/product-list/product-list.component.ts` and do the following:
+    - Inside `ProductListComponent`, declare `EventEmitter` called `addToCartEvent` to emit add to cart events:
 
-### 3.1 Update Product Model with id.
-1. Open `src/app/models/product.ts` and update `Product` model with the follwoing:
+        ```.js
+        @Output() addToCartEvent = new EventEmitter<Product>();
+        ```
 
-    ```.js
-    export class Product {
-        constructor(
-            public id: number,
-            public name: string,
-            public description: string,
-            public price: number,
-        ) {}
+    - Delete the following line since it's no longer needed:
+
+        ```.js
+        cart: Product[] = [];
+        ```
+
+    - Update the `addToCart()` method to emit event instead of adding to previously declared list of Products:
+
+        ```.js
+        addToCart(product: Product) {
+            this.addToCartEvent.emit(product);
+        }
+        ```
+        
+- Open `src/app/components/product-list/product-list.component.html` and remove the folling code:
+
+    ```.html
+    @if (cart.length > 0) {
+        🛒 {{cart.length}}
+    } @else {
+        🛒 Empty
     }
     ```
 
-### 3.2 Inject Product Service to Product List Component
+### 2.3 Move Cart To App Component
 
-1. Open `src/app/components/product-list/product-list.component.ts` file and do the following:
-    - Import ProductService:
+- Open `src/app/app.component.ts` file and do the following:
+    - Inside `src/app/app.component.ts` update `imports` to include `CartComponent`:
 
         ```.js
-        import { ProductService } from '../../services/product.service';
+        imports: [RouterOutlet, ProductListComponent, CartComponent],
         ```
 
-    - Add the `ProductService` as a parameter into the  `constructor`.
+    -  Inside `AppConponent`, declare a reference to `CartComponent` using `viewChild` signal API.
 
         ```.js
-         constructor(private productService: ProductService) {}
+        cardComponent = viewChild(CartComponent);
         ```
-    - Replace static list of Products with a service call.
+    - Just below reference to `CartComponent`, declare a new function that would be called when add to Cart button is clicked in a Product. This function should trigger `addToCart` method in a `CartComponent`. 
 
         ```.js
-        products: Product[] = this.productService.getProducts();
-        ```
-
-### 3.3 Instpect Changes
-
-1. Start Angular Development Server if not yet started:
-
-    ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
-    ```
-    > _Otherwise refresh the browser tab to see updated view._
-
-2. You should see the following getting rendered in your browser:
-
-    [![result2](res/result2.png)]() 
-
-
-## 4. Injecting Services In Other Services 
-
-### 4.1 Create A New Logger And Implement It's Logic
-
-1. Create a new `Logger` using CLI:
-
-    ```.sh
-    npx -p @angular/cli ng generate service services/logger/logger 
-    ```
-2. Open `src/app/services/logger/logger.service.ts` file and do the following:
-    - Create logging methods just below the `constructor` :
-
-        ```.js
-        log(msg: unknown) { console.log(msg); }
-        error(msg: unknown) { console.error(msg); }
-        warn(msg: unknown) { console.warn(msg); }
-        ```
-
-### 4.2 Inject Logger Service Into Project Service And Log When Projects Are Fetched
-
-1. Open `src/app/services/product.service.ts` file and do the following:
-    - Import Logger service:
-
-        ```.js
-        import { LoggerService } from '../logger/logger.service';
-        ```
-
-    - Add the `LoggerService` as a parameter into the  `constructor`.
-
-        ```.js
-        constructor(private logger: LoggerService) { }
-        ```
-    - Inside `getProducts()` method log that courses are getting fetched.
-
-        ```.js
-        this.logger.log('Fetching Products');
-        ```
-### 4.3 Review Changes
-
-1. Start Angular Development Server if not yet started:
-
-    ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
-    ```
-    > _Otherwise refresh the browser tab to see updated view._
-
-2. Inspect console and see whether your application logs with Logger.
-    [![result3](res/result3.png)]() 
-
-## 5. Configuring Dependency Providers
-
-
-### 5.1 Creating Enhanced Logger
-
-1. Create a new `TimedLoggerService` using CLI:
-
-    ```.sh
-    npx -p @angular/cli ng generate service services/logger/timed-logger 
-    ```
-
-2. Open `src/app/services/logger/timed-logger.service.ts` file and do the following:
-    - Extend `LoggerService` with `TimedLoggerService`:
-
-        ```.js
-        export class TimeLoggerService extends LoggerService {...}
-        ```
-    - Override logging methods just below the `constructor`:
-
-        ```.js
-        constructor() {
-            super()
-        }
-        private getUtcDate(){
-            const timeElapsed = Date.now();
-            const today = new Date(timeElapsed);
-            const utcDate = today.toUTCString();
-            return utcDate;
-        }
-
-        override log(msg: unknown) { 
-            const date = this.getUtcDate();
-            console.log(`${date}: ${msg}`); 
-        }
-        override error(msg: unknown) { 
-            const date = this.getUtcDate();
-            console.error(`${date}: ${msg}`); 
-        }
-        override warn(msg: unknown) { 
-            const date = this.getUtcDate();
-            console.warn(`${date}: ${msg}`); 
+        addToCart(product: Product) {
+            this.cardComponent()?.addToCart(product);
         }
         ```
 
-### 5.2 Configure an app-wide provider in the ApplicationConfig of bootstrapApplication, it overrides one configured for root in the @Injectable() metadata.
+- Open `src/app/app.component.html` file and do the following:
+    - Add the following element after the `<div class="divider"...`, to render `CartComponent`.
+ 
+        ```.html
+        <app-cart></app-cart>
+        ```
 
-1. Open `app.config.ts` file and add the following:
-    - Update providers with the following:
+    - Update `app-product-list` element with target event and it's template statement.
 
-    ```.js
-      providers: [provideRouter(routes), provideClientHydration(), {provide: LoggerService, useClass: TimedLoggerService}]
-    ```
+        ```.html
+        <app-product-list (addToCartEvent)="addToCart($event)"></app-product-list>
+        ```
 
 ### 5.3 Review Changes
 
@@ -224,4 +158,4 @@
     > _Otherwise refresh the browser tab to see updated view._
 
 2. Inspect console and see whether your application logs with new Enhanced Timed Logger.
-    [![result4](res/result4.png)]() 
+    [![result2](res/result2.png)]() 
