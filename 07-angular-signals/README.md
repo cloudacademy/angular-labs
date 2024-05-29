@@ -157,5 +157,5 @@
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
-2. Inspect console and see whether your application logs with new Enhanced Timed Logger.
+2. You should see the following getting rendered in your browser:
     [![result2](res/result2.png)]() 
