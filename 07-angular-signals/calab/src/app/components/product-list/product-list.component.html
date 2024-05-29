@@ -1,0 +1,15 @@
+<div>
+    <h2>Product List</h2>
+
+    @if (cart.length > 0) {
+        🛒 {{cart.length}}
+    } @else {
+        🛒 Empty
+    }
+
+
+    @for (product of products; track product) {
+        <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
+    }
+
+</div>
