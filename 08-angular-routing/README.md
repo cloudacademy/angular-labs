@@ -36,21 +36,11 @@
 
 ### 2.1 Create A New Component Called CreateProduct
 
-- Create a new Component called `Cart` using CLI:
+1. Create a new Component called `Cart` using CLI:
 
     ```.sh
     npx -p @angular/cli ng generate component components/create-product
     ```
-
-## 3. Configure Angular Router
-
-### 2.2 Create 
-```.js
-export const routes: Routes = [
-    { path: 'create-product', component: CreateProductComponent },
-    { path: 'product-list', component: ProductListComponent },
-];
-```
 
 ## 3. Define and Use Your Routes
 
@@ -130,20 +120,6 @@ export const routes: Routes = [
 
     ```.bash
     npx -p @angular/cli ng serve 
-    ```
-    > _Otherwise refresh the browser tab to see updated view._
-
-2. You should see the following getting rendered in your browser:
-    [![result2](res/result2.png)]() 
-
-
-
-### 5.3 Review Changes
-
-1. Start Angular Development Server if not yet started:
-
-    ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
