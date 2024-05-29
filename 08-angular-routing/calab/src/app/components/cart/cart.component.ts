@@ -1,5 +1,6 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, Signal, effect, signal } from '@angular/core';
 import { Product } from '../../models/product';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-cart',
@@ -9,16 +10,13 @@ import { Product } from '../../models/product';
   styleUrl: './cart.component.css'
 })
 export class CartComponent {
-  currentCart = signal<Product[]>([]);
-  constructor(){
-    effect(() => {
-      console.log(`The current car contains: ${this.currentCart()}`);
-    });
+  cartSignal: Signal<Product[]>;
+
+  constructor(private cartService: CartService){
+    this.cartSignal = this.cartService.getCart();
   }
 
-  public addToCart(product: Product){
-    this.currentCart.update(list => {
-      return [...list, product];
-   })
+  addToCart(product: Product){
+    this.cartService.addToCart(product)
   }
 }

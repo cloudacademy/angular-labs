@@ -32,121 +32,111 @@
 
     > _You should see similar view to where you left off in previous lab._
 
-## 2. Move Cart Separate Component
+## 2. Create a new Component
 
-### 2.1 Create A Cart Component
+### 2.1 Create A New Component Called CreateProduct
 
 - Create a new Component called `Cart` using CLI:
 
     ```.sh
-    npx -p @angular/cli ng generate component components/cart
+    npx -p @angular/cli ng generate component components/create-product
     ```
 
-### 2.2 Implement Signal Inside Cart Component
+## 3. Configure Angular Router
 
-- Open `src/app/components/cart/cart.component.ts` file and do the following:
-    - Declate a writable signal and set its default value to empty list `[]`:
+### 2.2 Create 
+```.js
+export const routes: Routes = [
+    { path: 'create-product', component: CreateProductComponent },
+    { path: 'product-list', component: ProductListComponent },
+];
+```
 
-        ```.js
-        currentCart = signal<Product[]>([]);
-        ```
+## 3. Define and Use Your Routes
 
-    - Inside `constructor` of `CartComponent`, call an `effect` and log the Signal value:
+### 3.1 Define Routes In Routes Array
 
-        ```.js
-        constructor(){
-            effect(() => {
-                console.log(`The current car contains: ${this.currentCart()}`);
-            });
-        }
-        ```
-    - Inside `CartComponent`, just below constructor, declare `addToCart` function that takes `Product` as a parameter:
+1. Open `src/app/app.routes.ts` file and do the following:
+    - Import components that going to be used in router.
 
         ```.js
-        public addToCart(product: Product){
-            this.currentCart.update(list => {
-                return [...list, product];
-            })
-        }
+        import { CreateProductComponent } from './components/create-product/create-product.component';
+        import { ProductListComponent } from './components/product-list/product-list.component';
+        ```
+    - Define each route as an JavaScript object and add it to `Routes` array:
+
+        ```.js
+        { path: 'create-product', component: CreateProductComponent },
+        { path: 'product-list', component: ProductListComponent }
         ```
 
-- Open `src/app/components/cart/cart.component.html` and replace current HTML code with the following:
+### 3.2 Use Defined Routs In an Application
 
-    ```.html
-    @if (currentCart().length > 0) {
-        🛒 {{currentCart().length}}
-    } @else {
-        🛒 Empty
+1. Open `src/app/app.component.ts` file and do the following:
+    - Import `RouterLink` from the `@angular/router`.
+2. Open `src/app/app.component.html` file and do the following:
+    - Just above `<h1>Hello, {{ title }}</h1>`, use a routerLink attributes to add routes to selected elements. Also move `<app-cart></app-cart>` to navigation bar as well.:
+
+        ```.html
+        <nav class="nav-bar">
+            <ul>
+                <li><a routerLink="/create-product" >Create Product</a></li>​
+                <li><a routerLink="/product-list">Product List</a></li>​
+                <li>
+                    <app-cart></app-cart>
+                </li>
+            </ul>
+        </nav>
+        ```
+    - Move `<router-outlet />` from bottom of the file to just below `<div class="divider"...` .
+        ```.html
+        <div class="divider" role="separator" aria-label="Divider"></div>
+        <router-outlet />
+        ```
+3. Open `src/app/app.component.css` file and do the following styling for Navigation bar:
+    ```.css
+    .nav-bar {
+        background-color: #a8bef5;
+        padding: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .nav-bar ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .nav-bar li {
+        margin-right: 20px;
+    }
+    
+    .nav-bar a {
+        color: #000000;
+        padding: 10px;
+        text-decoration: none;
+    }
+    
+    .nav-bar a:hover {
+        color: #8a7878;
     }
     ```
 
-### 2.3 Remove Cart From Product List Component
+### 3.3 Review Changes
 
-- Open `src/app/components/product-list/product-list.component.ts` and do the following:
-    - Inside `ProductListComponent`, declare `EventEmitter` called `addToCartEvent` to emit add to cart events:
+1. Start Angular Development Server if not yet started:
 
-        ```.js
-        @Output() addToCartEvent = new EventEmitter<Product>();
-        ```
-
-    - Delete the following line since it's no longer needed:
-
-        ```.js
-        cart: Product[] = [];
-        ```
-
-    - Update the `addToCart()` method to emit event instead of adding to previously declared list of Products:
-
-        ```.js
-        addToCart(product: Product) {
-            this.addToCartEvent.emit(product);
-        }
-        ```
-        
-- Open `src/app/components/product-list/product-list.component.html` and remove the folling code:
-
-    ```.html
-    @if (cart.length > 0) {
-        🛒 {{cart.length}}
-    } @else {
-        🛒 Empty
-    }
+    ```.bash
+    npx -p @angular/cli ng serve 
     ```
+    > _Otherwise refresh the browser tab to see updated view._
 
-### 2.3 Move Cart To App Component
+2. You should see the following getting rendered in your browser:
+    [![result2](res/result2.png)]() 
 
-- Open `src/app/app.component.ts` file and do the following:
-    - Inside `src/app/app.component.ts` update `imports` to include `CartComponent`:
 
-        ```.js
-        imports: [RouterOutlet, ProductListComponent, CartComponent],
-        ```
-
-    -  Inside `AppConponent`, declare a reference to `CartComponent` using `viewChild` signal API.
-
-        ```.js
-        cardComponent = viewChild(CartComponent);
-        ```
-    - Just below reference to `CartComponent`, declare a new function that would be called when add to Cart button is clicked in a Product. This function should trigger `addToCart` method in a `CartComponent`. 
-
-        ```.js
-        addToCart(product: Product) {
-            this.cardComponent()?.addToCart(product);
-        }
-        ```
-
-- Open `src/app/app.component.html` file and do the following:
-    - Add the following element after the `<div class="divider"...`, to render `CartComponent`.
- 
-        ```.html
-        <app-cart></app-cart>
-        ```
-
-    - Update `app-product-list` element with target event and it's template statement.
-
-        ```.html
-        <app-product-list (addToCartEvent)="addToCart($event)"></app-product-list>
-        ```
 
 ### 5.3 Review Changes
 

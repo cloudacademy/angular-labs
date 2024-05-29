@@ -42,16 +42,23 @@
     npx -p @angular/cli ng generate component components/cart
     ```
 
-### 2.2 Implement Signal Inside Cart Component
+### 2.1 Create A Cart Service
 
-- Open `src/app/components/cart/cart.component.ts` file and do the following:
+- Create a new Component called `Cart` using CLI:
+
+    ```.sh
+    npx -p @angular/cli ng generate service services/cart
+    ```
+
+### 2.2 Implement Signal Inside Cart Service
+- Open `src/app/services/cart.service.ts` file and do the following:
     - Declate a writable signal and set its default value to empty list `[]`:
 
         ```.js
         currentCart = signal<Product[]>([]);
         ```
 
-    - Inside `constructor` of `CartComponent`, call an `effect` and log the Signal value:
+    - Inside `constructor` of `CartService`, call an `effect` and log the Signal value:
 
         ```.js
         constructor(){
@@ -60,21 +67,54 @@
             });
         }
         ```
-    - Inside `CartComponent`, just below constructor, declare `addToCart` function that takes `Product` as a parameter:
+
+    - Inside `CartService`, just below constructor, declare `getCart` function:
 
         ```.js
-        public addToCart(product: Product){
+        getCart(){
+            return this.currentCart;
+        }
+        ```
+    - Inside `CartService`, just below constructor, declare `addToCart` function that takes `Product` as a parameter:
+
+        ```.js
+        addToCart(product: Product){
             this.currentCart.update(list => {
                 return [...list, product];
             })
         }
         ```
 
+
+### 2.2 Inject CartService Into Cart Component
+
+- Open `src/app/components/cart/cart.component.ts` file and do the following:
+    - Declate a writable signal called `cartSignal`:
+
+        ```.js
+        cartSignal: Signal<Product[]>;
+        ```
+
+    - Inject `CartService` into CartComponents `constructor` and retrieve cart signal and assign it to the variable declared in previous step:
+
+        ```.js
+        constructor(private cartService: CartService){
+            this.cartSignal = this.cartService.getCart();
+        }
+        ```
+    - Inside `CartComponent`, just below constructor, declare `addToCart` function that takes `Product` as a parameter and sends it to `CartService`:
+
+        ```.js
+        public addToCart(product: Product){
+            this.cartService.addToCart(product)
+        }
+        ```
+
 - Open `src/app/components/cart/cart.component.html` and replace current HTML code with the following:
 
     ```.html
-    @if (currentCart().length > 0) {
-        🛒 {{currentCart().length}}
+    @if (cartSignal().length > 0) {
+        🛒 {{cartSignal().length}}
     } @else {
         🛒 Empty
     }
@@ -83,10 +123,10 @@
 ### 2.3 Remove Cart From Product List Component
 
 - Open `src/app/components/product-list/product-list.component.ts` and do the following:
-    - Inside `ProductListComponent`, declare `EventEmitter` called `addToCartEvent` to emit add to cart events:
+    - Inject `CartService` into producListComponents `constructor`:
 
         ```.js
-        @Output() addToCartEvent = new EventEmitter<Product>();
+        constructor(private productService: ProductService, private cartService: CartService) {}
         ```
 
     - Delete the following line since it's no longer needed:
@@ -95,11 +135,11 @@
         cart: Product[] = [];
         ```
 
-    - Update the `addToCart()` method to emit event instead of adding to previously declared list of Products:
+    - Update the `addToCart()` method to call `CartService` instead of adding to previously declared list of Products:
 
         ```.js
         addToCart(product: Product) {
-            this.addToCartEvent.emit(product);
+            this.cartService.addToCart(product);
         }
         ```
         
@@ -122,30 +162,11 @@
         imports: [RouterOutlet, ProductListComponent, CartComponent],
         ```
 
-    -  Inside `AppConponent`, declare a reference to `CartComponent` using `viewChild` signal API.
-
-        ```.js
-        cardComponent = viewChild(CartComponent);
-        ```
-    - Just below reference to `CartComponent`, declare a new function that would be called when add to Cart button is clicked in a Product. This function should trigger `addToCart` method in a `CartComponent`. 
-
-        ```.js
-        addToCart(product: Product) {
-            this.cardComponent()?.addToCart(product);
-        }
-        ```
-
 - Open `src/app/app.component.html` file and do the following:
     - Add the following element after the `<div class="divider"...`, to render `CartComponent`.
  
         ```.html
         <app-cart></app-cart>
-        ```
-
-    - Update `app-product-list` element with target event and it's template statement.
-
-        ```.html
-        <app-product-list (addToCartEvent)="addToCart($event)"></app-product-list>
         ```
 
 ### 5.3 Review Changes
