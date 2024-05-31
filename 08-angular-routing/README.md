@@ -59,6 +59,11 @@
         { path: 'create-product', component: CreateProductComponent },
         { path: 'product-list', component: ProductListComponent }
         ```
+    - Define a redirect to Product List Path when root path is called:
+
+        ```.js
+        { path: '', redirectTo: '/product-list', pathMatch: 'full' }, ​
+        ```
 
 ### 3.2 Use Defined Routs In an Application
 
@@ -124,4 +129,7 @@
     > _Otherwise refresh the browser tab to see updated view._
 
 2. You should see the following getting rendered in your browser:
+    [![result3](res/result3.png)]() 
+
+3. If you click on Create Product link:
     [![result2](res/result2.png)]() 
