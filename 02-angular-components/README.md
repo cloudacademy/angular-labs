@@ -76,7 +76,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
@@ -106,16 +106,24 @@
 
 ### 4.1 Modify ProductListComponent
 1. Open `src/app/components/product-list/product-list.component.ts` file and inside `ProductListComponent` class do the following:
+    - Import `Product` model:
+
+        ```.js
+        import { Product } from '../../models/product';
+        ```
     - Declare an emty cart list:
 
         ```.js
         cart: Product[] = [];
         ```
-    - Declare a Product:
+
+     - Declare a Product:
 
         ```.js
         product = new Product('Product A',  10.99);
         ```
+    
+
     - Create a method called `addToCart()` that is takes product as a parameter and pushes that product to the cart:
 
         ```.js
@@ -123,7 +131,7 @@
             this.cart.push(product);
         }
         ```
-2. Open `src/app/components/product-list/product-lis.component.html` file and do the following:
+2. Open `src/app/components/product-list/product-list.component.html` file and do the following:
     - Display cart list length. Just before `<app-product>` add the following:
     
         ```.html
@@ -132,7 +140,13 @@
 
 ### 4.2 Modify ProductComponent
 1. Open `src/app/components/product/product.component.ts` file and inside `ProductComponent` class do the following:
-    - Declare a product Input() that is passed from parent component :
+    - Import `Input`, `Output`, `EventEmitter` and `Product`:
+
+        ```.js
+        import { Component, EventEmitter, Input, Output } from '@angular/core';
+        import { Product } from '../../models/product';     
+        ```
+    - Declare a product Input() that is passed from parent component:
     
         ```.js
         @Input() product!: Product;
@@ -182,10 +196,12 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
 2. You should see the following getting rendered in your browser:
 
     [![result](res/result2.png)]() 
+    
+    > _Clicking 'Add to Cart' button should increase Cart count._
