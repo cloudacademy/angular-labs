@@ -9,7 +9,7 @@ export class CartService {
 
   constructor() {
     effect(() => {
-      console.log(`The current car contains: ${this.currentCart()}`);
+      console.log(`The current cart contains: ${this.currentCart()}`);
     });
   }
 

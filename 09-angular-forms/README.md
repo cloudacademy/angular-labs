@@ -125,15 +125,23 @@
     ```
 
 - Open `src/app/components/create-product/create-product.component.ts` and do the following:
-    - Just above `constructor`, declare a product model to bind to the template:
+    - Import `Product` model:
+
+        ```.js
+        import { Product } from '../../models/product';
+        ```
+
+    - Declare a product model to bind to the template:
 
         ```.js
         product: Product;
         ```
-    - Inside `constructor` initialize Product instance
+    - Declare `constructor` and inside initialize Product instance
 
         ```.js
-        this.product = new Product('', '', 1);​
+        constructor(){
+            this.product = new Product('', '', 1);​
+        }
         ```
 
 - Open `src/app/components/create-product/create-product.component.html` file and add the following form:
@@ -157,20 +165,27 @@
 ### Submitting the Form
 
 - Open `src/app/components/create-product/create-product.component.ts` and do the following:
-    - Import and injecct ProductService into constrctor.
+    - Import `ProductService`:
+
+        ```.js
+        import { ProductService } from '../../services/product.service';
+        ```
+    - Injecct `ProductService` into constrctor.
 
         ```.js
           constructor(private productService: ProductService){...}
         ```
 
-    - Implement `onSubmit` method that would call ProductService.
+    - Implement `onSubmit` method that calls ProductService and it's createProduct function.
+
         ```.js
         onSubmit(){
             console.log(this.product);
             this.productService.createProduct(this.product);
         }
         ```
-    
+        > _createProduct() function will be created in the next step._
+
 - Open `src/app/components/create-product/create-product.component.html` and Add an ngSubmit event listener to the form tag with the onSubmit() callback method:
 
     ```.html
@@ -181,7 +196,12 @@
 ### Update ProductService
 
 - Open `src/app/services/product.service.ts` and do the folowing:
-    - Declare a list if Products and initialize it with an empty list: 
+    - Import `Product` model:
+        
+        ```.js
+        import { Product } from '../models/product';
+        ```
+    - Declare a list if Products and initialize it with an empty list `[]`: 
 
         ```.js
         products: Product[] = [];
@@ -222,7 +242,7 @@
         ```.js
         router = new Router();
         ```
-    - Update `createProduct()` method to call `router`:
+    - Update `onSubmit()` method to call `router`:
 
         ```.js
         this.router.navigate(['/product-list']);
@@ -276,7 +296,7 @@
         imports: [ReactiveFormsModule],​
         ```
     
-    - Just above `constructor`, declare a `productForm`:
+    - Just above `constructor`, replace `product` with `productForm`:
 
         ```.js
         productForm: FormGroup;
@@ -287,7 +307,7 @@
         constructor(private productService: ProductService, private formBuilder: FormBuilder){...}
         ```
 
-    - Inside `constructor` initialize productForm instance
+    - Inside `constructor` replace product with productForm instance 
 
         ```.js
         this.productForm = this.formBuilder.group({
@@ -299,8 +319,9 @@
     - Update `onSubmit()` function to use productForm value:
 
         ```.js
+        this.router.navigate(['/product-list']);
         console.log(this.productForm.value);
-        this.productService.createProduct(this.productForm.value);
+        this.productService.createProduct(this.productForm.value);  
         ```
 
 - Open `src/app/components/create-product/create-product.component.html` and do the following:
