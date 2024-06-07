@@ -69,6 +69,10 @@
 
 1. Open `src/app/app.component.ts` file and do the following:
     - Import `RouterLink` from the `@angular/router`.
+    - Update `imports` to include `RouterLink`:
+        ```.js
+        imports: [RouterOutlet, RouterLink, ProductListComponent, CartComponent],
+        ```
 2. Open `src/app/app.component.html` file and do the following:
     - Just above `<h1>Hello, {{ title }}</h1>`, use a routerLink attributes to add routes to selected elements. Also move `<app-cart></app-cart>` to navigation bar as well.:
 
@@ -88,6 +92,8 @@
         <div class="divider" role="separator" aria-label="Divider"></div>
         <router-outlet />
         ```
+    - Remove `<app-product-list ...>` element.
+    
 3. Open `src/app/app.component.css` file and do the following styling for Navigation bar:
     ```.css
     .nav-bar {
