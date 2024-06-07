@@ -44,7 +44,7 @@
 
 ### 2.1 Create A Cart Service
 
-- Create a new Component called `Cart` using CLI:
+- Create a new Service called `Cart` using CLI:
 
     ```.sh
     npx -p @angular/cli ng generate service services/cart
@@ -52,6 +52,13 @@
 
 ### 2.2 Implement Signal Inside Cart Service
 - Open `src/app/services/cart.service.ts` file and do the following:
+    - Import `signal`, `effect` and `Product`:
+
+        ```.js
+        import { Injectable, signal, effect } from '@angular/core';
+        import { Product } from '../models/product';
+        ```
+
     - Declate a writable signal and set its default value to empty list `[]`:
 
         ```.js
@@ -89,6 +96,14 @@
 ### 2.2 Inject CartService Into Cart Component
 
 - Open `src/app/components/cart/cart.component.ts` file and do the following:
+    - Import `Signal`, `Product` and `CartService`:
+
+        ```.js
+        import { Component, Signal } from '@angular/core';
+        import { Product } from '../../models/product';
+        import { CartService } from '../../services/cart.service';
+        ```
+
     - Declate a writable signal called `cartSignal`:
 
         ```.js
@@ -123,6 +138,12 @@
 ### 2.3 Remove Cart From Product List Component
 
 - Open `src/app/components/product-list/product-list.component.ts` and do the following:
+    - Import `CartService`:
+
+        ```.js
+        import { CartService } from '../../services/cart.service';
+        ```
+
     - Inject `CartService` into producListComponents `constructor`:
 
         ```.js
@@ -156,6 +177,12 @@
 ### 2.3 Move Cart To App Component
 
 - Open `src/app/app.component.ts` file and do the following:
+    - Import `CartComponent`:
+
+        ```.js
+        import { CartComponent } from './components/cart/cart.component';
+        ```
+
     - Inside `src/app/app.component.ts` update `imports` to include `CartComponent`:
 
         ```.js
@@ -174,9 +201,12 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
 2. You should see the following getting rendered in your browser:
     [![result2](res/result2.png)]() 
+
+    > _Clicking 'Add to Cart' button should increse cart count._
+
