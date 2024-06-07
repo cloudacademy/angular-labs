@@ -22,7 +22,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
@@ -45,6 +45,12 @@
 - Open `src/app/directives/zoom-on-hoover.directive.ts` file and add the following code:
 
     ```.js
+    import { Directive, ElementRef, HostListener } from '@angular/core';
+
+    @Directive({
+    selector: '[appZoomOnHoover]',
+    standalone: true
+    })
     export class ZoomOnHooverDirective {
         constructor(private elRef: ElementRef) {}
 
@@ -63,11 +69,19 @@
 
 ### 2.2 Import Attribute Directive Into Component
 
-1. Open `src/app/components/product/product.component.ts` file and import `ZoomOnHoover` directive :
+1. Open `src/app/components/product/product.component.ts` file do the following:
 
-    ```.js
-    imports: [CurrencyPipe, TruncatePipe, ZoomOnHooverDirective],
-    ```
+    - Import `ZoomOnHooverDirective`:
+
+        ```.js
+        import { ZoomOnHooverDirective } from '../../directives/zoom-on-hoover.directive';
+        ```
+    - Update Imports array with `ZoomOnHooverDirective`
+
+        ```.js
+        imports: [CurrencyPipe, TruncatePipe, ZoomOnHooverDirective],
+        ```
+
 1. Open `src/app/components/product/product.component.html` file and and apply `ZoomOnHoover` directive to an element.​:
 
     ```.html
@@ -79,13 +93,15 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
 2. You should see the following getting rendered in your browser:
 
     [![result2](res/result2.png)]() 
+
+    > _Note how product card zooms in once hovered over._
 
 
 ## 3. Custom Structural Directive​
@@ -99,45 +115,45 @@
 
 - Open `src/app/directives/tooltip.directive.ts` file and add the following code:
     ```.js
+    import { Directive, ElementRef, Input, Renderer2 } from "@angular/core";
+
     @Directive({
-    selector: '[appTooltip]',
-    standalone: true
+        selector: '[appTooltip]',
+        standalone: true
     })
     export class TooltipDirective {
+        @Input('appTooltip') tooltipText!: string;
+        tooltipElement = this.renderer.createElement('span');
 
-    @Input('appTooltip') tooltipText!: string;
-    tooltipElement = this.renderer.createElement('span');
-    
+        constructor(private el: ElementRef, private renderer: Renderer2) {
+            this.renderer.listen(this.el.nativeElement, 'mouseover', () => {
+                this.showTooltip();
+            });
+            this.renderer.listen(this.el.nativeElement, 'mouseout', () => {
+                this.hideTooltip();
+            });
+        }
 
-    constructor(private el: ElementRef, private renderer: Renderer2) {
-        this.renderer.listen(this.el.nativeElement, 'mouseover', () => {
-        this.showTooltip();
-        });
-        this.renderer.listen(this.el.nativeElement, 'mouseout', () => {
-        this.hideTooltip();
-        });
-    }
+        showTooltip() {
+            this.renderer.appendChild(this.el.nativeElement, this.tooltipElement);
+            this.renderer.setProperty(this.tooltipElement, 'textContent', this.tooltipText);
 
-    showTooltip() {
-        this.renderer.appendChild(this.el.nativeElement, this.tooltipElement);
-        this.renderer.setProperty(this.tooltipElement, 'textContent', this.tooltipText);
+            const tooltipStyle: any = {
+            'position': 'absolute',
+            'padding': '10px',
+            'border-radius': '5px',
+            'background-color': '#333',
+            'color': '#fff',
+            'font-size': '14px'
+            };
+            Object.keys(tooltipStyle).forEach(style => {
+            this.renderer.setStyle(this.tooltipElement, style, tooltipStyle[style]);
+            });
+        }
 
-        const tooltipStyle: any = {
-        'position': 'absolute',
-        'padding': '10px',
-        'border-radius': '5px',
-        'background-color': '#333',
-        'color': '#fff',
-        'font-size': '14px'
-        };
-        Object.keys(tooltipStyle).forEach(style => {
-        this.renderer.setStyle(this.tooltipElement, style, tooltipStyle[style]);
-        });
-    }
-
-    hideTooltip() {
-        this.renderer.removeChild(this.el.nativeElement, this.tooltipElement);
-    }
+        hideTooltip() {
+            this.renderer.removeChild(this.el.nativeElement, this.tooltipElement);
+        }
     }
     ```
 
@@ -149,15 +165,24 @@
 
 ### 3.2 Import Structural Directive Into Component
 
-1. Open `src/app/components/product/product.component.ts` file and import `Tooltip` directive :
+1. Open `src/app/components/product/product.component.ts` file and 
 
-    ```.js
-    imports: [CurrencyPipe, TruncatePipe, TooltipDirective],
-    ```
+    - Import `TooltipDirective`:
+
+        ```.js
+        import { TooltipDirective } from '../../directives/tooltip.directive';
+        ```
+
+    - Update Imports array with `TooltipDirective`
+
+        ```.js
+        imports: [CurrencyPipe, TruncatePipe, ZoomOnHooverDirective, TooltipDirective],
+        ```
+
 1. Open `src/app/components/product/product.component.html` file and and apply `Tooltip` directive to an element.​:
 
     ```.html
-    <p [appTooltip]="product.description" ...
+    <p class="product-description" [appTooltip]="product.description">{{ product.description | truncate}}</p>
     ```
 
 ### 3.3 Instpect Changes
@@ -165,10 +190,10 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
-2. You should see the following getting rendered in your browser:
+2. You should see the tooltip once hover over the truncated description in a product card:
 
     [![result3](res/result3.png)]() 
