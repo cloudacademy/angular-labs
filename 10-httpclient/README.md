@@ -32,17 +32,18 @@
 
 ### 1.3 Install Angular Dependencies
 
-1. Change directory to `calab`:
+1. Open new terminal window.
+2. Change directory to `calab`:
 
     ```.bash
     cd calab
     ```
-2. Install dependencies by running the following command:
+3. Install dependencies by running the following command:
 
     ```.bash
     npm install
     ```
-3. You should see a message in your Terminal confirming the npm packages were installed successfully:
+4. You should see a message in your Terminal confirming the npm packages were installed successfully:
     [![installed](res/installed.png)]() 
 
 ### 1.1 Start The Application
@@ -74,7 +75,7 @@
 
         ```.js
         export const appConfig: ApplicationConfig = {
-            providers: [ provideRouter(routes), provideHttpClient() ]
+              providers: [provideRouter(routes), provideClientHydration(), {provide: LoggerService, useClass: TimedLoggerService}, provideHttpClient() ]
         };
         ```
 
