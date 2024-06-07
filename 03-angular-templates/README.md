@@ -22,7 +22,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
@@ -108,7 +108,7 @@
 ### 3.1 Modify Product List Template To Conditionaly Display Cart Value
 
 1. Open `src/app/components/product-list/product-list.component.html` file and do the following:
-    - Update current HTML to include Angular built-in control flow block that allows conditionaly display elements:
+    - Update current HTML that displays cart count to include Angular built-in control flow block that allows conditionaly display elements:
 
         ```.html
         @if (cart.length > 0) {
@@ -131,11 +131,11 @@
         ];
         ```
 2. Open `src/app/components/product-list/product-list.component.html` file and do the following:
-    - Update current HTML to include Angular built-in control flow block that allows repeatedly display elements:
+    - Update current HTML to include Angular built-in control flow block that allows repeatedly display `<app-product>` elements:
 
         ```.html
         @for (product of products; track product) {
-            <app-product [product]="product"(addToCartEvent)="addToCart($event)"></app-product>
+            <app-product [product]="product" (addToCartEvent)="addToCart($event)"></app-product>
         }
         ```
 
@@ -144,7 +144,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
