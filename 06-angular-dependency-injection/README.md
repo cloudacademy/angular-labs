@@ -103,7 +103,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
@@ -136,7 +136,7 @@
     - Import Logger service:
 
         ```.js
-        import { LoggerService } from '../logger/logger.service';
+        import { LoggerService } from './logger/logger.service';
         ```
 
     - Add the `LoggerService` as a parameter into the  `constructor`.
@@ -154,7 +154,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
@@ -173,10 +173,15 @@
     ```
 
 2. Open `src/app/services/logger/timed-logger.service.ts` file and do the following:
-    - Extend `LoggerService` with `TimedLoggerService`:
+    - Import `LoggerService`:
 
         ```.js
-        export class TimeLoggerService extends LoggerService {...}
+        import { LoggerService } from './logger.service';
+        ```
+    - Make `TimedLoggerService` to extend `LoggerService`:
+
+        ```.js
+        export class TimedLoggerService extends LoggerService {...}
         ```
     - Override logging methods just below the `constructor`:
 
@@ -208,6 +213,12 @@
 ### 5.2 Configure an app-wide provider in the ApplicationConfig of bootstrapApplication, it overrides one configured for root in the @Injectable() metadata.
 
 1. Open `app.config.ts` file and add the following:
+    - Import `LoggerService` and `TimedLoggerService`:
+
+        ```.js
+        import { LoggerService } from './services/logger/logger.service';
+        import { TimedLoggerService } from './services/logger/timed-logger.service';
+        ```
     - Update providers with the following:
 
     ```.js
@@ -219,7 +230,7 @@
 1. Start Angular Development Server if not yet started:
 
     ```.bash
-    npx -p @angular/cli ng serve  --host 0.0.0.0 
+    npx -p @angular/cli ng serve 
     ```
     > _Otherwise refresh the browser tab to see updated view._
 
